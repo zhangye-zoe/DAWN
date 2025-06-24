@@ -1,0 +1,24 @@
+# Python
+__pycache__
+
+# compressed files
+*.zip
+*.rar
+*.tar
+
+# custom
+*.json
+*.log*
+*.npz
+try.*
+
+# Pytorch
+*.pth
+
+# Image
+*.png
+*.jpg
+*.tif
+
+# Numpy
+*.npy
