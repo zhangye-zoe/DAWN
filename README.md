@@ -1,6 +1,6 @@
 # DAWN: Domain-Adaptive Weakly Supervised Nuclei Segmentation
 
-# The code still be orginization ... Please wait
+## The code still be orginization ... Please wait
 
 This repository contains the official implementation of **DAWN**, a Domain-Adaptive Weakly Supervised Nuclei Segmentation via Cross-Task Interactions.
 
@@ -49,18 +49,17 @@ data/
     ├── images/
     └── annotations/
 ```
-4. Training
+### 4. Training
 ```bash
 python main.py --config configs/train_config.yaml
 ```
-5. Evaluation
+### 5. Evaluation
 ```bash
 python main.py --config configs/eval_config.yaml
 ```
 
-See our paper for full benchmark comparisons.
 
-📄 Citation
+## 📄 Citation
 If you use this code, please cite our paper:
 
 ```bash
