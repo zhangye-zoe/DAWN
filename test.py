@@ -145,7 +145,7 @@ def main(opt):
         if save_flag:
             # print('\tSaving image results...')
             io.imsave('{:s}/{:s}_pred.png'.format(prob_maps_folder, name), pred.astype(np.uint8) * 255)
-            io.imsave('{:s}/{:s}_prob.png'.format(prob_maps_folder, name), prob_maps)
+            io.imsave('{:s}/{:s}_prob.png'.format(prob_maps_folder, name), prob_maps.astype(np.uint8) * 255)
 
         counter += 1
         # if counter % 10 == 0:

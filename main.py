@@ -28,37 +28,37 @@ def main():
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(x) for x in opt.train['gpus'])
     print("GPUS", opt.train["gpus"])
 
-    with open('../data/{:s}/train_val_test.json'.format(opt.dataset), 'r') as file:
+    with open('data/{:s}/train_val_test.json'.format(opt.dataset), 'r') as file:
         data_list = json.load(file)
         train_list, val_list, test_list = data_list['train'], data_list['val'], data_list['test']
 
     num_repeat = 3
     opt.test['epoch'] = 'best'
     opt.test['threshold'] = 0.7
-    opt.test['label_dir'] = '../data/{:s}/labels_point'.format(opt.dataset)
+    opt.test['label_dir'] = 'data/{:s}/labels_point'.format(opt.dataset)
 
     # initial training
     opt.print_options()
     print('=============== initial training ===============')
-    opt.round = 3
+    opt.round = 0
     print('=> Preparing training samples')
     # prepare_data(opt)
     opt.train['save_dir'] = '{:s}/{:d}'.format(opt.train['root_save_dir'], opt.round)
     print('=> Start training')
     print('opts', opt)
-    train(opt)
+    # train(opt)
     
 
     # test model
     print('=> Testing ...')
-    opt.test['img_dir'] = '../data_for_train/{:s}/images/test'.format(opt.dataset)
+    opt.test['img_dir'] = 'data_for_train/{:s}/images/test'.format(opt.dataset)
     opt.test['save_dir'] = '{:s}/{:s}/{:s}'.format(opt.train['root_save_dir'], str(opt.round),opt.test['epoch'])
     opt.test['model_path'] = '{:s}/{:s}/checkpoints/checkpoint_{:s}.pth.tar' \
         .format(opt.train['root_save_dir'],str(opt.round),  opt.test['epoch'])
     test(opt)
 
     print('=> Inference ...')
-    opt.test['img_dir'] = '../data/{:s}/images'.format(opt.dataset)
+    opt.test['img_dir'] = 'data/{:s}/images'.format(opt.dataset)
     test(opt)
 
     for i in range(opt.round+1, num_repeat+1):
@@ -67,7 +67,7 @@ def main():
 
         # ----- prepare training data ----- #
         probmap_dir = '{:s}/{:d}/{:s}/images_prob_maps'.format(opt.train['root_save_dir'], i-1, opt.test['epoch'])
-        label_bg_dir = '../data/{:s}/labels_bg_{:.2f}_round{:d}'.format(opt.dataset, opt.ratio, i)
+        label_bg_dir = 'data/{:s}/labels_bg_{:.2f}_round{:d}'.format(opt.dataset, opt.ratio, i)
         get_bg_from_prob_maps(probmap_dir, label_bg_dir, train_list, opt)
         print('=> Preparing training samples')
         prepare_data(opt)
@@ -79,14 +79,14 @@ def main():
 
         # test model
         print('=> Testing ...')
-        opt.test['img_dir'] = '../data_for_train/{:s}/images/test'.format(opt.dataset)
+        opt.test['img_dir'] = 'data_for_train/{:s}/images/test'.format(opt.dataset)
         opt.test['save_dir'] = '{:s}/{:d}/{:s}'.format(opt.train['root_save_dir'], i, opt.test['epoch'])
         opt.test['model_path'] = '{:s}/{:d}/checkpoints/checkpoint_{:s}.pth.tar' \
             .format(opt.train['root_save_dir'], i, opt.test['epoch'])
         test(opt)
 
         print('=> Inference ...')
-        opt.test['img_dir'] = '../data/{:s}/images'.format(opt.dataset)
+        opt.test['img_dir'] = 'data/{:s}/images'.format(opt.dataset)
         test(opt)
 
 

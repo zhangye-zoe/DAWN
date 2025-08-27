@@ -30,8 +30,8 @@ class Options:
         # --- training params --- #
         self.train = dict()
         self.train['random_seed'] = 2022
-        self.train['data_dir'] = '../data_for_train/{:s}'.format(self.dataset)  # path to data
-        self.train['root_save_dir'] = '../experiments/detection/{:s}/{:.2f}'.format(self.dataset, self.ratio)  # path to save results
+        self.train['data_dir'] = 'data_for_train/{:s}'.format(self.dataset)  # path to data
+        self.train['root_save_dir'] = 'experiments/detection/{:s}/{:.2f}'.format(self.dataset, self.ratio)  # path to save results
         self.train['input_size'] = 256      # input size of the image
         self.train['train_epochs'] = 80     # number of training iterations
         self.train['batch_size'] = 16       # batch size
@@ -50,14 +50,14 @@ class Options:
         self.test = dict()
         self.test['epoch'] = 'best'
         self.test['gpus'] = [1, ]
-        self.test['threshold'] = 0.35
-        self.test['img_dir'] = '../data/{:s}/images'.format(self.dataset)
-        self.test['label_dir'] = '../data/{:s}/labels_point'.format(self.dataset)
+        self.test['threshold'] = 0.2
+        self.test['img_dir'] = 'data/{:s}/images'.format(self.dataset)
+        self.test['label_dir'] = 'data/{:s}/labels_point'.format(self.dataset)
         self.test['save_flag'] = True
         self.test['patch_size'] = 256
         self.test['overlap'] = 80
-        self.test['save_dir'] = '../experiments/detection/{:s}/test_results'.format(self.dataset)
-        self.test['model_path'] = '../experiments/detection/{:s}/checkpoints/checkpoint_{:s}.pth.tar' \
+        self.test['save_dir'] = 'experiments/detection/{:s}/test_results'.format(self.dataset)
+        self.test['model_path'] = 'experiments/detection/{:s}/checkpoints/checkpoint_{:s}.pth.tar' \
             .format(self.dataset, self.test['epoch'])
 
         # --- post processing --- #

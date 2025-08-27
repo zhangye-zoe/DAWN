@@ -17,14 +17,14 @@ import torch
 
 def main(opt):
     dataset = opt.dataset
-    data_dir = '../data/{:s}'.format(dataset) # data/MO
-    img_dir = '../data/{:s}/images'.format(dataset) # data/MO/images
-    label_point_dir = '../data/{:s}/labels_point_{:.2f}'.format(dataset, opt.ratio) # data/MO/labels_point_1.00
-    label_detect_dir = '../data/{:s}/labels_detect_{:.2f}'.format(dataset, opt.ratio) # data/MO/labels_detect_1.00
-    label_bg_dir = '../data/{:s}/labels_bg_{:.2f}_round{:d}'.format(dataset, opt.ratio, opt.round) # data/MO/labels_bg_1.00_round1
-    init_mask_dir = '../data/{:s}/init_mask'.format(dataset) # data/MO/init_mask
-    true_mask_dir = '../data/{:s}/true_mask'.format(dataset) # data/MO/true_mask
-    train_data_dir = '../data_for_train/{:s}'.format(dataset) # data_for_train/MO
+    data_dir = 'data/{:s}'.format(dataset) # data/MO
+    img_dir = 'data/{:s}/images'.format(dataset) # data/MO/images
+    label_point_dir = 'data/{:s}/labels_point_{:.2f}'.format(dataset, opt.ratio) # data/MO/labels_point_1.00
+    label_detect_dir = 'data/{:s}/labels_detect_{:.2f}'.format(dataset, opt.ratio) # data/MO/labels_detect_1.00
+    label_bg_dir = 'data/{:s}/labels_bg_{:.2f}_round{:d}'.format(dataset, opt.ratio, opt.round) # data/MO/labels_bg_1.00_round1
+    init_mask_dir = 'data/{:s}/init_mask'.format(dataset) # data/MO/init_mask
+    true_mask_dir = 'data/{:s}/true_mask'.format(dataset) # data/MO/true_mask
+    train_data_dir = 'data_for_train/{:s}'.format(dataset) # data_for_train/MO
     
 
     with open('{:s}/train_val_test.json'.format(data_dir), 'r') as file:
@@ -34,7 +34,7 @@ def main(opt):
 
     if opt.round == 0:
         # ----- sample points
-        old_label_point_dir = '../data/{:s}/labels_point'.format(dataset)
+        old_label_point_dir = 'data/{:s}/labels_point'.format(dataset)
         create_folder(label_point_dir)
         sample_points(old_label_point_dir, label_point_dir, opt.ratio, train_list)
 
@@ -92,7 +92,7 @@ def create_detect_label_from_points(label_point_dir, label_detect_dir, img_list,
         seg_points =  utils.crop_to_shape(points, seg_, data_format="HW")
 
         if np.sum(points > 0):
-            label_detect = gaussian_filter(points.astype(np.float), sigma=radius/3)
+            label_detect = gaussian_filter(points.astype(np.float32), sigma=radius/3)
             val = np.min(label_detect[points > 0])
             label_detect = label_detect / val
             label_detect[label_detect < 0.05] = 0
@@ -105,15 +105,17 @@ def create_detect_label_from_points(label_point_dir, label_detect_dir, img_list,
             seg_num_point_dict[name] = 0
         # import utils
         # utils.show_figures((points, label_detect))
-        io.imsave('{:s}/{:s}_label_detect.png'.format(label_detect_dir, name), label_detect.astype(np.float))
-        joblib.dump(det_num_point_dict, filename=f"../data/{dataset}/det_num_point.json")
-        joblib.dump(seg_num_point_dict, filename=f"../data/{dataset}/seg_num_point.json")
+        io.imsave('{:s}/{:s}_label_detect.tif'.format(label_detect_dir, name), label_detect.astype(np.uint8)*255)
+        joblib.dump(det_num_point_dict, filename=f"data/{dataset}/det_num_point.json")
+        joblib.dump(seg_num_point_dict, filename=f"data/{dataset}/seg_num_point.json")
 
 
 def split_patches(data_dir, save_dir, post_fix=None):
     import math
     """ split large image into small patches """
     create_folder(save_dir)
+    print('=' * 100)
+    print(data_dir)
 
     image_list = os.listdir(data_dir)
     for image_name in image_list:
@@ -121,6 +123,8 @@ def split_patches(data_dir, save_dir, post_fix=None):
         if post_fix and name[-len(post_fix):] != post_fix:
             continue
         image_path = os.path.join(data_dir, image_name)
+        print('=' * 100)
+        print(image_path)
         image = io.imread(image_path)
         seg_imgs = []
 
