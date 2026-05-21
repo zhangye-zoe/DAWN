@@ -43,7 +43,10 @@ def main(opt):
     # opt.parse()
     opt.define_transforms()
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(x) for x in opt.test['gpus'])
+    use_cuda = torch.cuda.is_available() and len(opt.test['gpus']) > 0
+    if use_cuda:
+        os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(x) for x in opt.test['gpus'])
+    device = torch.device('cuda' if use_cuda else 'cpu')
 
     img_dir = opt.test['img_dir']
     label_dir = opt.test['label_dir']
@@ -68,15 +71,17 @@ def main(opt):
 
     model_name = opt.model['name']
     model = create_model(model_name, opt.model['out_c'], opt.model['pretrained'])
-    model = torch.nn.DataParallel(model)
-    model = model.cuda()
+    if use_cuda and torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model)
+    model = model.to(device)
 
     # ----- load trained model ----- #
     # print("=> loading trained model")
-    best_checkpoint = torch.load(model_path)
+    best_checkpoint = torch.load(model_path, map_location=device)
     model.load_state_dict(best_checkpoint['state_dict'])
     print("=> loaded model at epoch {}".format(best_checkpoint['epoch']))
-    model = model.module
+    if isinstance(model, torch.nn.DataParallel):
+        model = model.module
 
     # switch to evaluate mode
     model.eval()
@@ -117,7 +122,7 @@ def main(opt):
         input = test_transform((img,))[0].unsqueeze(0)
 
         # print('\tComputing output probability maps...')
-        prob_maps, seg_prob = get_probmaps(input, model, opt)
+        prob_maps, seg_prob = get_probmaps(input, model, opt, device)
         # print(np.array(seg_prob[0,0,...]))
         # cv2.imwrite(f"my_test/{opt.test}/{img_name}",np.array(seg_prob[0,0,...]*255).astype("uint8") )
 
@@ -175,15 +180,15 @@ def main(opt):
                      .format(save_dir, strs[-1], opt.test['threshold']))
 
 
-def get_probmaps(input, model, opt):
+def get_probmaps(input, model, opt, device):
     size = opt.test['patch_size']
     overlap = opt.test['overlap']
 
     if size == 0:
         with torch.no_grad():
-            output = model(input.cuda())
+            output = model(input.to(device))
     else:
-        output, seg_prob = utils.split_forward(model, input, size, overlap, opt.model['out_c'])
+        output, seg_prob = utils.split_forward(model, input.to(device), size, overlap, opt.model['out_c'])
     output = torch.sigmoid(output[0,0,:,:]).cpu().numpy()
 
     return output, seg_prob

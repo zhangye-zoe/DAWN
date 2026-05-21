@@ -14,10 +14,13 @@ def main():
     opt = Options(isTrain=True)
     opt.parse()
 
+    use_cuda = torch.cuda.is_available() and len(opt.train['gpus']) > 0
+
     if opt.train['random_seed'] >= 0:
         print('=> Using random seed {:d}'.format(opt.train['random_seed']))
         torch.manual_seed(opt.train['random_seed'])
-        torch.cuda.manual_seed(opt.train['random_seed'])
+        if use_cuda:
+            torch.cuda.manual_seed(opt.train['random_seed'])
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
         np.random.seed(opt.train['random_seed'])
@@ -25,7 +28,8 @@ def main():
     else:
         torch.backends.cudnn.benchmark = True
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(x) for x in opt.train['gpus'])
+    if use_cuda:
+        os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(x) for x in opt.train['gpus'])
     print("GPUS", opt.train["gpus"])
 
     with open('data/{:s}/train_val_test.json'.format(opt.dataset), 'r') as file:

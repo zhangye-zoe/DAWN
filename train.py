@@ -33,7 +33,10 @@ def main(opt):
         os.makedirs(opt.train['save_dir'])
     tb_writer = SummaryWriter('{:s}/tb_logs'.format(opt.train['save_dir']))
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(x) for x in opt.train['gpus'])
+    use_cuda = torch.cuda.is_available() and len(opt.train['gpus']) > 0
+    if use_cuda:
+        os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(x) for x in opt.train['gpus'])
+    device = torch.device('cuda' if use_cuda else 'cpu')
 
     opt.define_transforms()
     opt.save_options()
@@ -46,15 +49,16 @@ def main(opt):
     model = create_model(model_name, opt.model['out_c'], opt.model['pretrained'])
     # if not opt.train['checkpoint']:
     #     logger.info(model)
-    model = nn.DataParallel(model)
-    model = model.cuda()
+    if use_cuda and torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
+    model = model.to(device)
 
     # ----- define optimizer ----- #
     optimizer = torch.optim.Adam(model.parameters(), opt.train['lr'], betas=(0.9, 0.99),
                                  weight_decay=opt.train['weight_decay'])
 
     # ----- define criterion ----- #
-    criterion = torch.nn.MSELoss(reduction='none').cuda()
+    criterion = torch.nn.MSELoss(reduction='none').to(device)
     # criterion = mse_loss
 
     # ----- load data ----- #
@@ -93,11 +97,11 @@ def main(opt):
     for epoch in range(num_epoch):
         # train for one epoch or len(train_loader) iterations
         logger.info('Epoch: [{:d}/{:d}]'.format(epoch+1, num_epoch))
-        train_loss = train(opt, train_loader, model, optimizer, criterion)
+        train_loss = train(opt, train_loader, model, optimizer, criterion, device)
 
         # evaluate on val set
         with torch.no_grad():
-            val_recall, val_prec, val_F1 = validate(opt, model, val_transform)
+            val_recall, val_prec, val_F1 = validate(opt, model, val_transform, device)
 
         # check if it is the best accuracy
         is_best = val_F1 > best_score
@@ -128,7 +132,7 @@ def main(opt):
         i.close()
 
 
-def train(opt, train_loader, model, optimizer, criterion):
+def train(opt, train_loader, model, optimizer, criterion, device):
     # list to store the average loss for this epoch
     det_results = utils.AverageMeter(1)
     mutual_results = utils.AverageMeter(1)
@@ -142,12 +146,12 @@ def train(opt, train_loader, model, optimizer, criterion):
         if opt.round == 0:
             input, target, init_mask, true_mask = sample[0], sample[1], sample[2], sample[3]
             target = target.squeeze(1)
-            input, target, init_mask, true_mask = input.cuda(), target.cuda(), init_mask.cuda(), true_mask.cuda()
+            input, target, init_mask, true_mask = input.to(device), target.to(device), init_mask.to(device), true_mask.to(device)
         else:
             input, target, bg, init_mask, true_mask = sample[0], sample[1], sample[2], sample[3], sample[4]
             target = target.squeeze(1)
             bg = bg.squeeze(1)
-            input, target, bg, init_mask, true_mask = input.cuda(), target.cuda(), bg.cuda(), init_mask.cuda(), true_mask.cuda()
+            input, target, bg, init_mask, true_mask = input.to(device), target.to(device), bg.to(device), init_mask.to(device), true_mask.to(device)
             # print("bg", bg.max())
             # print("init_mask", init_mask.max())
             # print("true_mask", true_mask.max())
@@ -190,7 +194,7 @@ def train(opt, train_loader, model, optimizer, criterion):
         # 先注释掉
         dist_map = utils.generate_training_np(det_prob)
         retain = (dist_map>0)#.astype(np.float32)
-        retain = torch.tensor(retain)
+        retain = torch.tensor(retain, device=device)
         # plt.imshow(retain.cpu().numpy()[0,...,0])
         # plt.show()
         # plt.savefig("retain.png")
@@ -277,7 +281,7 @@ def train(opt, train_loader, model, optimizer, criterion):
     return all_results.avg[0]
 
 
-def validate(opt, model, data_transform):
+def validate(opt, model, data_transform, device):
     total_TP = 0.0
     total_FP = 0.0
     total_FN = 0.0
@@ -302,7 +306,7 @@ def validate(opt, model, data_transform):
         input, label = data_transform((img, Image.fromarray(gt)))
         input = input.unsqueeze(0)
 
-        prob_map = get_probmaps(input, model, opt)
+        prob_map = get_probmaps(input, model, opt, device)
         prob_map = prob_map.cpu().numpy()
         # print(prob_map)
         # print("=" * 80)
@@ -329,15 +333,15 @@ def validate(opt, model, data_transform):
     return recall, precision, F1
 
 
-def get_probmaps(input, model, opt):
+def get_probmaps(input, model, opt, device):
     size = opt.test['patch_size']
     overlap = opt.test['overlap']
 
     if size == 0:
         with torch.no_grad():
-            output = model(input.cuda())
+            output = model(input.to(device))
     else:
-        output, seg_prob = utils.split_forward(model, input, size, overlap)
+        output, seg_prob = utils.split_forward(model, input.to(device), size, overlap)
     output = output.squeeze(0)
     prob_maps = torch.sigmoid(output[0,:,:])
 

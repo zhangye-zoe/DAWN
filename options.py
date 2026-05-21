@@ -41,6 +41,7 @@ class Options:
         self.train['log_interval'] = 5     # iterations to print training results
         self.train['workers'] = 8           # number of workers to load images
         self.train['gpus'] = [0, ]           # select gpu devices
+        self.train['use_amp'] = True
 
         # --- data transform --- #
         self.transform = dict()
@@ -54,6 +55,7 @@ class Options:
         self.test['img_dir'] = 'data/{:s}/images'.format(self.dataset)
         self.test['label_dir'] = 'data/{:s}/labels_point'.format(self.dataset)
         self.test['save_flag'] = True
+        self.test['use_amp'] = True
         self.test['patch_size'] = 256
         self.test['overlap'] = 80
         self.test['save_dir'] = 'experiments/detection/{:s}/test_results'.format(self.dataset)
@@ -80,6 +82,8 @@ class Options:
             parser.add_argument('--gpus', type=int, nargs='+', default=self.train['gpus'], help='GPUs for training')
             parser.add_argument('--data-dir', type=str, default=self.train['data_dir'], help='directory of training data')
             parser.add_argument('--root-save-dir', type=str, default=self.train['root_save_dir'], help='directory to save training results')
+            parser.add_argument('--cpu', action='store_true', help='force running on CPU only')
+            parser.add_argument('--no-amp', action='store_true', help='disable mixed precision')
             args = parser.parse_args()
 
             self.train['batch_size'] = args.batch_size
@@ -94,6 +98,9 @@ class Options:
             self.train['init_mask_dir'] = '{:s}/init_mask'.format(self.train['data_dir'])
             self.train['true_mask_dir'] = '{:s}/true_mask'.format(self.train['data_dir'])
             self.train['root_save_dir'] = args.root_save_dir
+            self.train['use_amp'] = not args.no_amp
+            if args.cpu:
+                self.train['gpus'] = []
             if not os.path.exists(self.train['root_save_dir']):
                 os.makedirs(self.train['root_save_dir'], exist_ok=True)
         else:
@@ -103,6 +110,8 @@ class Options:
             parser.add_argument('--save-dir', type=str, default=self.test['save_dir'], help='directory to save test results')
             parser.add_argument('--model-path', type=str, default=self.test['model_path'], help='train model to be evaluated')
             parser.add_argument('--threshold', type=float, default=self.test['threshold'], help='threshold to obtain the prediction from probability map')
+            parser.add_argument('--cpu', action='store_true', help='force running on CPU only')
+            parser.add_argument('--no-amp', action='store_true', help='disable mixed precision')
             args = parser.parse_args()
             self.test['gpus'] = args.gpus
             self.test['img_dir'] = args.img_dir
@@ -110,6 +119,9 @@ class Options:
             self.test['save_dir'] = args.save_dir
             self.test['model_path'] = args.model_path
             self.test['threshold'] = args.threshold
+            self.test['use_amp'] = not args.no_amp
+            if args.cpu:
+                self.test['gpus'] = []
 
             if not os.path.exists(self.test['save_dir']):
                 os.makedirs(self.test['save_dir'], exist_ok=True)
@@ -190,5 +202,4 @@ class Options:
                         message += '{:>20}: {:<35}\n'.format(name, str(val))
         message += '# {str:s} End {str:s} #\n'.format(str='-' * 26)
         return message
-
 
