@@ -1,0 +1,11 @@
+# Core scientific stack. Install PyTorch separately according to your CUDA version.
+numpy==1.26.4
+scipy==1.11.4
+pandas>=2.0
+scikit-image>=0.21
+Pillow>=9.5
+PyYAML>=6.0
+tqdm>=4.65
+matplotlib>=3.7
+opencv-python-headless>=4.8
+tensorboard>=2.13

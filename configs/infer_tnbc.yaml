@@ -1,0 +1,17 @@
+seed: 2024
+device: cuda
+
+checkpoint: outputs/dawn_tnbc_round0/checkpoint_best.pt
+output_dir: outputs/dawn_tnbc_infer_round0
+
+model:
+  hover_mode: fast
+
+data:
+  image_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/images/train
+  point_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/labels_point/train
+  point_suffix: _label_point.png
+
+cpl:
+  theta: 0.2
+  distance: 25

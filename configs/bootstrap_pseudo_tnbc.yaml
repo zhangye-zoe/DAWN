@@ -1,0 +1,22 @@
+seed: 2024
+device: cuda
+checkpoint: outputs/source_pannuke/checkpoint_best.pt
+output_dir: outputs/dawn_tnbc_bootstrap_pseudo
+
+model:
+  hover_mode: fast
+  detector_backbone: resnet34
+
+data:
+  image_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/images/train
+  point_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/labels_point/train
+  point_suffix: _label_point.png
+  mean: [0.5, 0.5, 0.5]
+  std: [0.5, 0.5, 0.5]
+
+bootstrap:
+  seg_threshold: 0.5
+  distance: 25
+  min_area: 12
+  max_area: 2000
+  keep_if_no_point: false

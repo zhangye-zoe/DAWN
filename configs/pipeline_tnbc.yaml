@@ -1,0 +1,98 @@
+pipeline:
+  rounds: 3
+  root_output_dir: outputs/dawn_tnbc_pipeline
+  initial_source_checkpoint: outputs/source_pannuke/checkpoint_best.pt
+  initial_pseudo_dir: null
+
+bootstrap_pseudo:
+  enabled: true
+  seed: 2024
+  device: cuda
+  checkpoint: outputs/source_pannuke/checkpoint_best.pt
+  output_dir: outputs/dawn_tnbc_pipeline/bootstrap_pseudo
+  model:
+    hover_mode: fast
+    detector_backbone: resnet34
+  data:
+    image_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/images/train
+    point_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/labels_point/train
+    point_suffix: _label_point.png
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+  bootstrap:
+    seg_threshold: 0.5
+    distance: 25
+    min_area: 12
+    max_area: 2000
+    keep_if_no_point: false
+
+target_train:
+  seed: 2024
+  device: cuda
+  output_dir: outputs/unused_overwritten_by_pipeline
+  source_checkpoint: outputs/source_pannuke/checkpoint_best.pt
+  model:
+    hover_mode: fast
+    detector_backbone: resnet34
+    detector_pretrained: false
+  data:
+    target_root: /data4/zhangye/DAWN3/datasets/TNBC_prepared
+    image_dir: images
+    point_dir: labels_point
+    point_suffix: _label_point.png
+    split: train
+    pseudo_dir: null
+    instance_dir: labels_instance
+    gt_suffixes: [_label.png, _inst.png, .png]
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+  dawn:
+    r1: 11
+    r2: 22
+    sigma: 2.75
+    theta: 0.2
+    distance: 25
+    alpha: 0.1
+    beta: 0.15
+    foreground_weight: 10.0
+  postprocess:
+    seg_threshold: 0.5
+    min_area: 12
+    max_area: 2000
+  validation:
+    split: val
+    gt_suffixes: [_label.png, _inst.png, .png]
+    match_iou: 0.5
+  train:
+    epochs: 20
+    batch_size: 2
+    patch_size: 256
+    lr: 0.0001
+    weight_decay: 0.0001
+    num_workers: 0
+    amp: true
+    val_interval: 1
+    monitor: val_pq
+
+pseudo_infer:
+  seed: 2024
+  device: cuda
+  checkpoint: overwritten_by_pipeline
+  output_dir: overwritten_by_pipeline
+  model:
+    hover_mode: fast
+    detector_backbone: resnet34
+  data:
+    image_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/images/train
+    point_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/labels_point/train
+    point_suffix: _label_point.png
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+  cpl:
+    theta: 0.2
+    distance: 25
+    seg_threshold: 0.5
+    min_area: 12
+    max_area: 2000
+  visualize:
+    enabled: false

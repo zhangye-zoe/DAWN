@@ -1,0 +1,31 @@
+seed: 2024
+device: cuda
+output_dir: outputs/source_pannuke
+
+model:
+  hover_mode: fast
+
+data:
+  format: npy
+
+  image_npy: /data4/zhangye/DAWN4/datasets/source_data/PanNuke/pannuke_imgs.npy
+  label_npy: /data4/zhangye/DAWN4/datasets/source_data/PanNuke/pannuke_labs.npy
+  label_channel: null
+  mmap_mode: r
+
+  mean: [0.5, 0.5, 0.5]
+  std: [0.5, 0.5, 0.5]
+
+  augment:
+    enable: true
+    mode: train
+    input_shape: [256, 256]
+    mask_shape: [256, 256]
+
+train:
+  epochs: 80
+  batch_size: 4
+  lr: 0.0001
+  weight_decay: 0.0001
+  num_workers: 4
+  amp: true

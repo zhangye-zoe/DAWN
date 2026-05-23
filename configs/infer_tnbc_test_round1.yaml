@@ -1,0 +1,21 @@
+seed: 2024
+device: cuda
+
+checkpoint: outputs/dawn_tnbc_round1/checkpoint_best.pt
+output_dir: outputs/dawn_tnbc_test_round1
+
+data:
+  image_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/images/test
+  point_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/labels_point/test
+  point_suffix: _label_point.png
+
+dawn:
+  r1: 11
+  r2: 22
+  sigma: 2.75
+  theta: 0.2
+  distance: 25
+
+infer:
+  batch_size: 1
+  num_workers: 0

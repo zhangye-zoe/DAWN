@@ -1,0 +1,163 @@
+# ============================================================
+# DAWN / PyTorch Research Project .gitignore
+# ============================================================
+
+# ------------------------------------------------------------
+# Datasets and large data files
+# ------------------------------------------------------------
+datasets/
+data/
+raw_data/
+processed_data/
+external_data/
+
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.mat
+*.pkl
+*.pickle
+*.joblib
+
+# Large image / WSI files
+*.svs
+*.ndpi
+*.mrxs
+*.scn
+*.tif
+*.tiff
+
+# Optional: ignore common image datasets
+# If your repo contains small demo images, put them under examples/
+*.png
+*.jpg
+*.jpeg
+*.bmp
+
+# Keep example figures if needed
+!examples/**/*.png
+!examples/**/*.jpg
+!assets/**/*.png
+!assets/**/*.jpg
+!docs/**/*.png
+!docs/**/*.jpg
+
+
+# ------------------------------------------------------------
+# Training outputs, checkpoints, logs
+# ------------------------------------------------------------
+outputs/
+runs/
+logs/
+checkpoints/
+weights/
+work_dirs/
+wandb/
+mlruns/
+tensorboard/
+
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.engine
+
+*.log
+*.out
+*.err
+
+
+# ------------------------------------------------------------
+# Inference / evaluation results
+# ------------------------------------------------------------
+predictions/
+results/
+vis/
+visualizations/
+pseudo_labels/
+pseudo/
+seg_prob/
+det_prob/
+pred_mask/
+source_mask/
+
+metrics.csv
+metrics_*.csv
+*_metrics.csv
+*_summary.json
+
+
+# ------------------------------------------------------------
+# Python cache and build files
+# ------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+
+# ------------------------------------------------------------
+# Virtual environments
+# ------------------------------------------------------------
+.env
+.venv
+env/
+venv/
+ENV/
+conda-meta/
+
+
+# ------------------------------------------------------------
+# Jupyter / notebooks
+# ------------------------------------------------------------
+.ipynb_checkpoints/
+
+
+# ------------------------------------------------------------
+# IDE / editor files
+# ------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+
+# ------------------------------------------------------------
+# OS files
+# ------------------------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+
+# ------------------------------------------------------------
+# Temporary files
+# ------------------------------------------------------------
+tmp/
+temp/
+cache/
+.cache/
+*.tmp
+*.bak
+*.backup
+
+
+# ------------------------------------------------------------
+# Project-specific local configs
+# ------------------------------------------------------------
+configs/local/
+*.local.yaml
+*.local.yml

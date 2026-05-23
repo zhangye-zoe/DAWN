@@ -1,0 +1,23 @@
+seed: 2024
+device: cuda
+
+checkpoint: outputs/dawn_tnbc_pipeline/round2/checkpoint_best.pt
+output_dir: outputs/dawn_tnbc_test_round2
+
+model:
+  hover_mode: fast
+
+data:
+  image_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/images/test
+  point_dir: /data4/zhangye/DAWN3/datasets/TNBC_prepared/labels_point/test
+  point_suffix: _label_point.png
+
+cpl:
+  theta: 0.2
+  distance: 25
+
+postprocess:
+  seg_threshold: 0.5
+  det_threshold: 0.2
+  min_area: 12
+  max_area: 2000

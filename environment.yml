@@ -1,0 +1,20 @@
+# Optional reference only. The README recommends the step-by-step installation
+# because conda channel solving can be slow on many servers.
+name: dawn
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy=1.26.4
+  - scipy=1.11.4
+  - pandas
+  - scikit-image
+  - pillow
+  - pyyaml
+  - tqdm
+  - matplotlib
+  - pip:
+      - opencv-python-headless>=4.8
+      - tensorboard>=2.13
